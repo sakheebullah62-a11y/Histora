@@ -15,9 +15,9 @@
 // ════════════════════════════════════════════════════════
 
 const GEMINI_KEYS = [
-  "YAHAN_APNI_KEY_1_DAALO",
-  "YAHAN_APNI_KEY_2_DAALO",
-  "YAHAN_APNI_KEY_3_DAALO",
-  "YAHAN_APNI_KEY_4_DAALO",
-  "YAHAN_APNI_KEY_5_DAALO"
+  "AQ.Ab8RN6K8InTsAQa7hcquvc5pWbbB-ftj3_1O7d73mEF9VItWPQ",
+  "AQ.Ab8RN6KMHvJ3UtTtuJA0V7yBtUxOfAHl3zkjh0N24YbqV5YHEg",
+  "AQ.Ab8RN6LZR-RYlQ_4t2yo0UUjSFbezi8yhbGl2xJ85M6s4gEwng",
+  "AQ.Ab8RN6Jc4FR0SD62mnlNUzGoI_jB8YP3lk3s-p46MF_sdlyhfA",
+  "AQ.Ab8RN6LZR-RYlQ_4t2yo0UUjSFbezi8yhbGl2xJ85M6s4gEwng"
 ].filter(k => !k.startsWith("YAHAN_"));
