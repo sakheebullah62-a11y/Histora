@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CANVAS — HISTORIA Visual Agent</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+  :root {
+    --bg:       #0a0812;
+    --surface:  #110f1c;
+    --card:     #16132a;
+    --border:   #2a2245;
+    --gold:     #c9a84c;
+    --gold-dim: #8a6e2f;
+    --purple:   #7c5cbf;
+    --purple-l: #9d7de8;
+    --text:     #e8e2f5;
+    --muted:    #7a7090;
+    --success:  #4caf82;
+    --error:    #e05c5c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #130f22 0%, transparent 100%);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold) 0%, #f0d080 50%, var(--gold-dim) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 3px;
+  }
+  .logo span {
+    font-size: 10px;
+    display: block;
+    font-weight: 400;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--purple-l), var(--gold-dim));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-top: -2px;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse 2s infinite;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .status-text { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  .hero { text-align: center; margin-bottom: 28px; }
+  .hero h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(26px, 6vw, 38px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold) 0%, #f5e090 40%, var(--purple-l) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .card-label {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 160px;
+    line-height: 1.6;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--purple); }
+
+  .options-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .option-group { flex: 1; min-width: 140px; }
+  .option-group label {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    margin-top: 16px;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    color: #0a0812;
+  }
+  .btn-gold:hover { filter: brightness(1.15); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(0,0,0,0.2);
+    border-top-color: #0a0812;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .spinner.visible { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .progress-text {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 12px;
+    display: none;
+  }
+  .progress-text.visible { display: block; }
+
+  .scenes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .scene-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .scene-card:hover { border-color: var(--purple); transform: translateY(-2px); }
+
+  .scene-img-wrap {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .scene-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .scene-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .scene-spinner {
+    width: 24px; height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .scene-info {
+    padding: 12px 14px;
+  }
+  .scene-num {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--gold-dim);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .scene-text {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+    max-height: 60px;
+    overflow: hidden;
+  }
+  .scene-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 14px 14px;
+  }
+  .scene-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .scene-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  #toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    max-width: 90%;
+    text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { background: rgba(76,175,130,0.15); border: 1px solid var(--success); color: var(--success); }
+  #toast.error   { background: rgba(224,92,92,0.15);  border: 1px solid var(--error);   color: var(--error); }
+  #toast.info    { background: rgba(201,168,76,0.12); border: 1px solid var(--gold);    color: var(--gold); }
+
+  .download-all {
+    display: none;
+    margin-top: 16px;
+  }
+  .download-all.visible { display: block; }
+
+  .style-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.6;
+    padding: 12px;
+    background: var(--surface);
+    border-radius: 8px;
+    border-left: 2px solid var(--gold-dim);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CANVAS<span>VISUAL AGENT · HISTORIA</span></div>
+  <div><span class="status-dot"></span><span class="status-text">FREE · UNLIMITED</span></div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Script to Visuals</h1>
+    <p>Paste Script · Get Cinematic Stickman Scenes</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">📜 PASTE YOUR SCRIPT</div>
+    <textarea id="script-input" placeholder="Apna full script yahan paste karo... CANVAS khud scenes detect karke visuals banayega."></textarea>
+
+    <div class="style-note" id="scene-preview-note" style="display:none"></div>
+
+    <div class="style-note">
+      🎨 Style locked: Stickman characters with white circle heads, cinematic dark painted backgrounds, dramatic lighting — matching @theprimalglitch aesthetic.
+    </div>
+
+    <button class="btn btn-gold" id="generate-btn" onclick="generateVisuals()">
+      <span class="spinner" id="main-spinner"></span>
+      <span id="btn-text">🖼️ Generate Scene Visuals</span>
+    </button>
+    <div class="progress-text" id="progress-text"></div>
+  </div>
+
+  <div class="scenes-grid" id="scenes-grid"></div>
+
+  <div class="download-all" id="download-all-wrap">
+    <button class="btn btn-gold" onclick="downloadAllInfo()">⬇️ How to Save All Images</button>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+// GEMINI_KEYS is now loaded from config.js (separate file)
+// Edit config.js to add/change keys — never edit this file for that
+
+let currentKeyIndex = 0;
+const exhaustedKeys = new Set();
+
+function getNextKey() {
+  if (GEMINI_KEYS.length === 0) return null;
+  let attempts = 0;
+  while (attempts < GEMINI_KEYS.length) {
+    const key = GEMINI_KEYS[currentKeyIndex];
+    currentKeyIndex = (currentKeyIndex + 1) % GEMINI_KEYS.length;
+    if (!exhaustedKeys.has(key)) return key;
+    attempts++;
+  }
+  return null; // all keys exhausted
+}
+
+const STYLE_PREFIX = "Animated stickman character with simple white circle head, minimal black stick body wearing primitive animal-skin clothing, set against a highly detailed cinematic painted background, dark moody atmosphere, dramatic warm lighting from fire or torches, ancient historical setting, rich environmental detail in background contrasting with the simple stick figure character, educational documentary animation style, 16:9 widescreen cinematic composition, high quality illustration, no text, no watermark";
+
+const MAX_CONCURRENT = 2; // Gemini free tier is stricter, keep batches small
+
+function toast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  setTimeout(() => t.className = '', 3500);
+}
+
+function splitIntoScenes(script) {
+  const cleaned = script
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const sentences = cleaned
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 8);
+
+  return sentences;
+}
+
+function buildPrompt(sceneText) {
+  const context = sceneText.substring(0, 180);
+  return `${STYLE_PREFIX}. Scene depicts: ${context}`;
+}
+
+document.getElementById('script-input').addEventListener('input', updatePreview);
+function updatePreview() {
+  const script = document.getElementById('script-input').value.trim();
+  const note = document.getElementById('scene-preview-note');
+  if (!script) { note.style.display = 'none'; return; }
+  const scenes = splitIntoScenes(script);
+  note.style.display = 'block';
+  const keyInfo = GEMINI_KEYS.length > 0
+    ? `${GEMINI_KEYS.length} API keys loaded`
+    : `⚠️ No API keys added yet — edit this file and add your Gemini keys`;
+  note.textContent = `🎨 ${scenes.length} scenes detect huay (1 image per sentence) · ${keyInfo}`;
+}
+
+// Call Gemini's image generation endpoint directly
+async function callGeminiImage(prompt, apiKey) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseModalities: ["IMAGE"] }
+    })
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    const status = response.status;
+    if (status === 429) {
+      const err = new Error("RATE_LIMIT");
+      err.isRateLimit = true;
+      throw err;
+    }
+    throw new Error(errData?.error?.message || `HTTP ${status}`);
+  }
+
+  const data = await response.json();
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find(p => p.inlineData);
+
+  if (!imagePart) {
+    throw new Error("No image returned");
+  }
+
+  const mimeType = imagePart.inlineData.mimeType || "image/png";
+  const base64Data = imagePart.inlineData.data;
+  return `data:${mimeType};base64,${base64Data}`;
+}
+
+async function generateOneScene(sceneText) {
+  const prompt = buildPrompt(sceneText);
+  let lastError = null;
+  let triesLeft = GEMINI_KEYS.length;
+
+  while (triesLeft > 0) {
+    const key = getNextKey();
+    if (!key) {
+      throw new Error("Sabhi API keys ki limit khatam ho gayi — kal try karo ya nayi key add karo");
+    }
+    try {
+      const imgSrc = await callGeminiImage(prompt, key);
+      return imgSrc;
+    } catch (err) {
+      lastError = err;
+      if (err.isRateLimit) {
+        exhaustedKeys.add(key);
+        triesLeft--;
+        continue; // try next key
+      } else {
+        throw err; // real error, don't burn through keys for it
+      }
+    }
+  }
+  throw lastError || new Error("Generation failed");
+}
+
+function renderSceneCard(sceneText, index) {
+  const card = document.createElement('div');
+  card.className = 'scene-card';
+  card.id = `scene-${index}`;
+  card.innerHTML = `
+    <div class="scene-img-wrap">
+      <div class="scene-loading">
+        <div class="scene-spinner"></div>
+        <span>Queued...</span>
+      </div>
+    </div>
+    <div class="scene-info">
+      <div class="scene-num">SCENE ${String(index+1).padStart(3,'0')}</div>
+      <div class="scene-text">${sceneText.substring(0, 100)}${sceneText.length > 100 ? '...' : ''}</div>
+    </div>
+    <div class="scene-actions">
+      <button class="scene-btn" disabled>⬇️ Save</button>
+      <button class="scene-btn" disabled>🔄 Redo</button>
+    </div>`;
+  return card;
+}
+
+function setSceneLoading(index, text) {
+  const wrap = document.querySelector(`#scene-${index} .scene-img-wrap`);
+  if (wrap) wrap.innerHTML = `<div class="scene-loading"><div class="scene-spinner"></div><span>${text}</span></div>`;
+}
+
+function setSceneSuccess(index, imgSrc, sceneText) {
+  const wrap = document.querySelector(`#scene-${index} .scene-img-wrap`);
+  wrap.innerHTML = `<img src="${imgSrc}" alt="Scene ${index+1}">`;
+
+  const actions = document.querySelector(`#scene-${index} .scene-actions`);
+  actions.innerHTML = `
+    <button class="scene-btn" onclick="saveScene(${index})">⬇️ Save</button>
+    <button class="scene-btn" onclick="redoScene(${index})">🔄 Redo</button>`;
+
+  window[`scene_img_${index}`] = imgSrc;
+  window[`scene_text_${index}`] = sceneText;
+}
+
+function setSceneError(index, errMsg) {
+  const wrap = document.querySelector(`#scene-${index} .scene-img-wrap`);
+  wrap.innerHTML = `<div class="scene-loading" style="color:var(--error)">❌ Failed<br><span style="font-size:10px">${errMsg || 'tap Redo'}</span></div>`;
+  const actions = document.querySelector(`#scene-${index} .scene-actions`);
+  actions.innerHTML = `
+    <button class="scene-btn" disabled>⬇️ Save</button>
+    <button class="scene-btn" onclick="redoScene(${index})">🔄 Redo</button>`;
+}
+
+let allScenes = [];
+
+async function generateVisuals() {
+  const script = document.getElementById('script-input').value.trim();
+
+  if (!script) { toast('Pehle script paste karo!', 'error'); return; }
+
+  if (GEMINI_KEYS.length === 0) {
+    toast('Koi API key nahi mili. File edit karke GEMINI_KEYS mein apni keys daalo.', 'error');
+    return;
+  }
+
+  allScenes = splitIntoScenes(script);
+
+  if (allScenes.length === 0) {
+    toast('Script se scenes detect nahi hue. Lamba script try karo.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('generate-btn');
+  const spinner = document.getElementById('main-spinner');
+  const btnText = document.getElementById('btn-text');
+  const progressText = document.getElementById('progress-text');
+  const grid = document.getElementById('scenes-grid');
+
+  btn.disabled = true;
+  spinner.classList.add('visible');
+  btnText.textContent = 'Generating...';
+  progressText.classList.add('visible');
+  grid.innerHTML = '';
+  exhaustedKeys.clear();
+
+  allScenes.forEach((sceneText, i) => grid.appendChild(renderSceneCard(sceneText, i)));
+
+  toast(`${allScenes.length} scenes mil gaye. Generation shuru...`, 'info');
+
+  let completed = 0;
+  let failed = 0;
+  const total = allScenes.length;
+
+  for (let i = 0; i < total; i += MAX_CONCURRENT) {
+    const batchIndices = [];
+    for (let j = i; j < Math.min(i + MAX_CONCURRENT, total); j++) batchIndices.push(j);
+
+    batchIndices.forEach(idx => setSceneLoading(idx, `Generating scene ${idx+1}...`));
+    progressText.textContent = `${completed + failed} of ${total} done · scenes ${i+1}-${Math.min(i+MAX_CONCURRENT,total)} generating...`;
+
+    await Promise.all(batchIndices.map(async (idx) => {
+      try {
+        const imgSrc = await generateOneScene(allScenes[idx]);
+        setSceneSuccess(idx, imgSrc, allScenes[idx]);
+        completed++;
+      } catch (err) {
+        setSceneError(idx, err && err.message ? err.message : 'generation failed');
+        failed++;
+      }
+      progressText.textContent = `${completed + failed} of ${total} done (${completed} success, ${failed} failed)`;
+    }));
+
+    // small delay between batches to respect rate limits
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  btn.disabled = false;
+  spinner.classList.remove('visible');
+  btnText.textContent = '🖼️ Generate Scene Visuals';
+  progressText.textContent = `✅ Done: ${completed} success, ${failed} failed out of ${total}`;
+
+  document.getElementById('download-all-wrap').classList.add('visible');
+
+  if (failed > 0) {
+    toast(`${completed} ban gaye, ${failed} fail huay — unke "Redo" dabao`, 'info');
+  } else {
+    toast(`✅ Sabhi ${completed} scenes ready!`, 'success');
+  }
+}
+
+function saveScene(index) {
+  const src = window[`scene_img_${index}`];
+  if (!src) { toast('Image abhi ready nahi', 'error'); return; }
+  const a = document.createElement('a');
+  a.href = src;
+  a.download = `historia_scene_${String(index+1).padStart(3,'0')}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  toast(`Scene ${index + 1} saved!`, 'success');
+}
+
+async function redoScene(index) {
+  const sceneText = window[`scene_text_${index}`] || allScenes[index];
+  setSceneLoading(index, 'Regenerating...');
+  try {
+    const imgSrc = await generateOneScene(sceneText);
+    setSceneSuccess(index, imgSrc, sceneText);
+    toast(`Scene ${index + 1} regenerated!`, 'success');
+  } catch (err) {
+    setSceneError(index, err && err.message ? err.message : 'failed again');
+    toast('Retry failed, dubara try karo', 'error');
+  }
+}
+
+function downloadAllInfo() {
+  toast('Har scene ke neeche "Save" button dabao individually', 'info');
+}
+
+// Show key status on load
+window.addEventListener('DOMContentLoaded', () => {
+  if (GEMINI_KEYS.length === 0) {
+    toast('⚠️ Koi API key nahi mili — file edit karke apni Gemini keys daalo', 'error');
+  } else {
+    toast(`✅ ${GEMINI_KEYS.length} API keys loaded — ready hai!`, 'success');
+  }
+});
+</script>
+</body>
+</html>
